@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificador de BIN de Cartões</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInBlur 1.5s ease-out forwards;
+        }
+        @keyframes fadeInBlur {
+            0% {
+                opacity: 0;
+                filter: blur(10px);
+            }
+            100% {
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            padding: 10px 20px;
+            display: inline-block;
+        }
+        label {
+            color: #111;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        textarea {
+            width: 80%;
+            height: 100px;
+            margin: 0 auto 15px auto;
+            padding: 10px;
+            border-radius: 5px;
+            border: 3px solid #800080;
+            font-size: 14px;
+            display: block;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            margin: 5px 0;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+        button#verificar {
+            background-color: #800080;
+        }
+        button#verificar:hover {
+            background-color: #5a005a;
+        }
+        button#copiar {
+            background-color: #28a745;
+            animation: rgbAnimation 3s infinite;
+        }
+        @keyframes rgbAnimation {
+            0% { background-color: rgb(255, 0, 0); }
+            33% { background-color: rgb(0, 255, 0); }
+            66% { background-color: rgb(0, 0, 255); }
+            100% { background-color: rgb(255, 0, 0); }
+        }
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #e9ecef;
+        }
+        .results h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .results ul li {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .audio-player {
+            margin-top: 20px;
+        }
+        .signature {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #111;
+        }
+    </style>
+    <script>
+        function verificarBIN(event) {
+            event.preventDefault();
+
+            const formData = new FormData(document.getElementById('binForm'));
+
+            fetch('process.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log("Data received: ", data); // Log para verificar a resposta
+                document.querySelector('.results ul').innerHTML = data;
+            })
+            .catch(error => console.error('Erro:', error));
+        }
+
+        function copiarResultados() {
+            const resultados = document.querySelector('.results ul');
+            const range = document.createRange();
+            range.selectNode(resultados);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            try {
+                document.execCommand('copy');
+                alert('Resultados copiados para a área de transferência!');
+            } catch (err) {
+                console.error('Falha ao copiar: ', err);
+            }
+
+            selection.removeAllRanges();
+        }
+
+        function carregarMusica(event) {
+            const audioPlayer = document.getElementById('audioPlayer');
+            const file = event.target.files[0];
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                audioPlayer.src = fileURL;
+                audioPlayer.play();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>&lt;/&gt;SOARESDEV!</h1>
+        <form id="binForm" onsubmit="verificarBIN(event)">
+            <label for="cartoes">Cole os cartões! (um por linha):</label>
+            <textarea name="cartoes" id="cartoes"></textarea><br>
+            <button type="submit" id="verificar">Verificar BIN</button>
+            <button type="button" id="copiar" onclick="copiarResultados()">Copiar Resultados</button>
+        </form>
+        <div class="results">
+            <h2>Cartões Filtrados:</h2>
+            <ul>
+                <!-- Os itens da lista serão inseridos aqui pelo JavaScript -->
+            </ul>
+        </div>
+        <div class="audio-player">
+            <input type="file" accept="audio/*" onchange="carregarMusica(event)">
+            <audio id="audioPlayer" controls>
+                Seu navegador não suporta o elemento de áudio.
+            </audio>
+        </div>
+    </div>
+    <div class="signature">
+        Desenvolvido por &lt;/&gt;SoaresT ❤️
+    </div>
+</body>
+</html>
